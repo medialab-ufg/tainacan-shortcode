@@ -1,7 +1,16 @@
 <div class="wrap">
-	<h1>Configure como as imagens devem aparecer</h1>
+    <form>
+        <div class="form-group">
+            <h2>Items template</h2>
+            <textarea id="image-show-template"></textarea>
+        </div>
 
-	<textarea id="image-show-template" placeholder="Seu código aqui" class="form-control">
+        <div class="form-group">
+            <h2>Collection template</h2>
+            <textarea id="collection-show-template" class="form-control" rows="15"></textarea>
+        </div>
 
-	</textarea>
+        <button type="submit" class="btn btn-primary btn-lg pull-right">Salvar</button>
+    </form>
+
 </div>

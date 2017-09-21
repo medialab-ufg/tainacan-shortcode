@@ -16,6 +16,34 @@ define ("COLLECTION_VIEW", "views/collection_view.php");
 /*Meta types*/
 define ('CATEGORY', 1);
 
+$plug_in_dir = plugin_dir_url(__FILE__);
+wp_enqueue_style("codemirror_css", $plug_in_dir . "libs/js/codemirror-5.30.0/lib/codemirror.css", null, false, "all");
+wp_enqueue_style("show_hint_css", $plug_in_dir . "libs/js/codemirror-5.30.0/addon/hint/show-hint.css", null, false, "all");
+wp_enqueue_style("main", $plug_in_dir . "libs/css/main.css", null, false, "all");
+/*
+  <script src="../lib/codemirror.js"></script>
+  <script src="../addon/hint/show-hint.js"></script>
+  <script src="../addon/hint/xml-hint.js"></script>
+  <script src="../addon/hint/html-hint.js"></script>
+  <script src="../mode/xml/xml.js"></script>
+  <script src="../mode/javascript/javascript.js"></script>
+  <script src="../mode/css/css.js"></script>
+  <script src="../mode/htmlmixed/htmlmixed.js"></script>
+*/
+
+wp_enqueue_script("codemirror_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/lib/codemirror.js', null, "5.30.0", true);
+wp_enqueue_script("show_hint_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/addon/hint/show-hint.js', null, "", true);
+wp_enqueue_script("xml_hint_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/addon/hint/xml-hint.js', null, "", true);
+wp_enqueue_script("xml_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/mode/xml/xml.js', null, "", true);
+wp_enqueue_script("javascript_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/mode/javascript/javascript.js', null, "", true);
+wp_enqueue_script("css_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/mode/css/css.js', null, "", true);
+wp_enqueue_script("htmlmixed_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/mode/htmlmixed/htmlmixed.js', null, "", true);
+//wp_enqueue_script("docs_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/doc/docs.css', null, "", true);
+
+
+
+wp_enqueue_script("main", $plug_in_dir . 'libs/js/main.js', null, "1.0", true);
+
 /****************************************************************-----*****************************************************************************************/
 add_action( 'admin_menu', 'tainacan_shortcode_submenu' );
 function tainacan_shortcode_submenu() {
