@@ -2,9 +2,9 @@
 	<div id="tainacan-collection">
 		<div class="container-fluid">
 			<div class="row">
-				<div class="col-md-3">
+				<div class="col-md-2">
 					<?php
-						if($content->thumnail)
+						if($content->thumbnail)
 						{
 							$image_url = $content->thumbnail;
 						}else {
@@ -14,7 +14,7 @@
 					<img src="<?php echo $image_url; ?>" class="img-responsive">
 				</div>
 
-				<div class="col-md-9">
+				<div class="col-md-10">
 					<h1 id="post-title"><?= $content->post_title; ?></h1>
 					<p id="post-content">
 						<?= $content->post_content; ?>
