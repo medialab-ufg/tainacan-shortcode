@@ -11,7 +11,7 @@
                     <li>Data da ultima modificação: <strong>{last_modified}</strong></li>
                     <li>Link: <strong>{link}</strong></li>
                     <li>Quantidade de comentários: <strong>{comment_count}</strong></li>
-                    <li>Link da miniatura: <strong>{thumnail}</strong></li>
+                    <li>Link da miniatura: <strong>{thumbnail}</strong></li>
                     <li>Link da capa: <strong>{cover}</strong></li>
                 </ul>
             </div>

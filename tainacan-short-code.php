@@ -63,6 +63,38 @@ function render_page($view, $content = null)
 	return $rendered_page;
 }
 
+function render_template($content, $template, $type)
+{
+	$page = '';
+	if(strcmp($type, "items") === 0)
+	{
+		foreach($content as $item_metas)
+		{
+			$page .= replace_in_template($template, $item_metas);
+		}
+	}
+	else if(strcmp($type, "collection") === 0)
+	{
+		$page .= replace_in_template($template, $content);
+	}
+
+	return $page;
+}
+
+function replace_in_template($template, $content)
+{
+	str_replace("{title}", $content->post_title, $template);
+	str_replace("{date}", $content->post_date, $template);
+	str_replace("{content}", $content->post_content, $template);
+	str_replace("{last_modified}", $content->post_modified, $template);
+	str_replace("{link}", $content->guid, $template);
+	str_replace("{comment_count}", $content->comment_count, $template);
+	str_replace("{thumbnail}", $content->thumbnail, $template);
+	str_replace("{cover}", $content->cover, $template);
+
+	return $template;
+}
+
 function get_collection_info($tainacan_url, $collection_name)
 {
 	$collection_name = rawurlencode($collection_name);
