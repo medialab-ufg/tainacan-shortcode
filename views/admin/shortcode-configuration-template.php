@@ -1,3 +1,7 @@
+<?php
+
+?>
+
 <div class="wrap">
     <form>
         <div class="form-group">

@@ -6,8 +6,16 @@ var config = {
 
 };
 
-var items_editor = CodeMirror.fromTextArea(document.getElementById("image-show-template"), config);
+var items_editor = CodeMirror.fromTextArea(document.getElementById("items-show-template"), config);
 var collection_editor = CodeMirror.fromTextArea(document.getElementById("collection-show-template"), config);
+
+items_editor.on('change', function (cm_items_editor) {
+    $("#items-show-template").text(cm_items_editor.getValue());
+});
+
+collection_editor.on('change', function (cm_collection_editor) {
+    $("#collection-show-template").text(cm_collection_editor.getValue());
+});
 
 $.ajax({
     url: CONTROLLERS_PATH + "templates_controller.php?operation=get_templates",
@@ -27,6 +35,7 @@ $.ajax({
     }
 });
 
+/*
 function save_templates() {
     var items_editor_val = items_editor.getValue(),
         collection_editor_val = collection_editor.getValue();
@@ -42,4 +51,4 @@ function save_templates() {
             swal("Salvo", "Seu(s) templates foram salvos", "success");
         }
     });
-}
+}*/

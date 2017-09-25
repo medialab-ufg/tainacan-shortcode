@@ -2,7 +2,7 @@
 $collection_template = get_option("tainacan_collection_template");
 if(!empty($collection_template))
 {
-    render_template($content, $collection_template, "collection");
+    tainacansc_render_template($content, $collection_template, "collection");
 }else{
     ?>
     <a href="<?= $content->guid; ?>" target="_blank">

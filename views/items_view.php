@@ -1,7 +1,7 @@
 <?php
 $items_template = get_option('tainacan_items_template');
 if(!empty($items_template)){
-    render_template($content, $items_template, 'items');
+    tainacansc_render_template($content, $items_template, 'items');
 }else{
     ?>
     <div class="tainacan-items">

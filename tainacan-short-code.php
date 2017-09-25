@@ -24,7 +24,7 @@ wp_enqueue_style("Bootstrap_css", 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3
 wp_enqueue_style("main", $plug_in_dir . "libs/css/main.css", null, false, "all");
 
 //Javascript
-wp_enqueue_script("jQuery", "https://code.jquery.com/jquery-3.2.1.min.js", null, "3.2.1", true);
+wp_enqueue_script("jQuery","https://code.jquery.com/jquery-3.2.1.min.js", null, "3.2.1", true);
 wp_enqueue_script("Bootstrap_js", "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js", 'jQuery', "3.3.7", true);
 wp_enqueue_script("sweetalert_js", "https://unpkg.com/sweetalert/dist/sweetalert.min.js", 'jQuery', "3.3.7", true);
 wp_enqueue_script("codemirror_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/lib/codemirror.js', null, "5.30.0", true);
@@ -35,18 +35,16 @@ wp_enqueue_script("javascript_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/mod
 wp_enqueue_script("css_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/mode/css/css.js', null, "", true);
 wp_enqueue_script("htmlmixed_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/mode/htmlmixed/htmlmixed.js', null, "", true);
 
-
-
 wp_enqueue_script("main", $plug_in_dir . 'libs/js/main.js', null, "1.0", true);
 
 /****************************************************************-----*****************************************************************************************/
 add_action( 'admin_menu', 'tainacan_shortcode_submenu' );
 function tainacan_shortcode_submenu() {
-	add_options_page( 'Tainacan shortcode', 'Tainacan Shortcode', 'manage_options', 'tainacan-shortcode', 'get_shortcode_page' );
+	//add_options_page( 'Tainacan shortcode', 'Tainacan Shortcode', 'manage_options', 'tainacan-shortcode', 'tainacansc_get_shortcode_page' );
 }
 
 /***************************************************** FUNCTIONS *****************************************************/
-function get_shortcode_page() {
+function tainacansc_get_shortcode_page() {
 	if ( !current_user_can( 'manage_options' ) )  {
 		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 	}
@@ -57,7 +55,7 @@ function get_shortcode_page() {
 	echo $page;
 }
 
-function render_page($view, $content = null)
+function tainacansc_render_page($view, $content = null)
 {
 	ob_start();
 	require ($view);
@@ -66,7 +64,7 @@ function render_page($view, $content = null)
 	return $rendered_page;
 }
 
-function render_template($content, $template, $type)
+function tainacansc_render_template($content, $template, $type)
 {
 	$template = stripslashes_deep($template);
 	$page = '';
@@ -75,18 +73,18 @@ function render_template($content, $template, $type)
 		foreach($content as $item_metas)
 		{
 			$item_metas = $item_metas->item;
-			$page .= replace_in_template($template, $item_metas);
+			$page .= tainacansc_replace_in_template($template, $item_metas);
 		}
 	}
 	else if(strcmp($type, "collection") === 0)
 	{
-		$page .= replace_in_template($template, $content);
+		$page .= tainacansc_replace_in_template($template, $content);
 	}
 
 	echo $page;
 }
 
-function replace_in_template($template, $content)
+function tainacansc_replace_in_template($template, $content)
 {
 	$template = str_replace("{title}", $content->post_title, $template);
 	$template = str_replace("{date}", $content->post_date, $template);
@@ -108,7 +106,7 @@ function replace_in_template($template, $content)
 	return $template;
 }
 
-function get_collection_info($tainacan_url, $collection_name)
+function tainacansc_get_collection_info($tainacan_url, $collection_name)
 {
 	$collection_name = rawurlencode($collection_name);
 
@@ -122,7 +120,7 @@ function get_collection_info($tainacan_url, $collection_name)
 }
 
 /*********************************************** [tainacan-show-items] ***********************************************/
-function get_meta_id($url, $collection_id, $required_meta_name, $required_meta_value)
+function tainacansc_get_meta_id($url, $collection_id, $required_meta_name, $required_meta_value)
 {
 	$special_url = $url.'wp-json/tainacan/v1/collections/'.$collection_id."/metadata?includeMetadata=1";
 	$collection_meta_tab = json_decode(file_get_contents($special_url));
@@ -167,7 +165,7 @@ function get_meta_id($url, $collection_id, $required_meta_name, $required_meta_v
 	return ['result' =>$result, 'type' => $meta_type];
 }
 
-function show_items($atts)
+function tainacansc_show_items($atts)
 {
 	$atributos = shortcode_atts( array(
 		'tainacan-url' => '',
@@ -182,14 +180,14 @@ function show_items($atts)
 		return;
 	}
 
-	$collection_info = get_collection_info($atributos['tainacan-url'], $atributos['collection-name']);
+	$collection_info = tainacansc_get_collection_info($atributos['tainacan-url'], $atributos['collection-name']);
 	if($collection_info)
 	{
 		$collection_id = $collection_info->ID;
 		$items = [];
 		if(!empty($atributos['meta-name']) && !empty($atributos['meta-value']))
 		{
-			$return = get_meta_id($atributos['tainacan-url'], $collection_id, $atributos['meta-name'], $atributos['meta-value']);
+			$return = tainacansc_get_meta_id($atributos['tainacan-url'], $collection_id, $atributos['meta-name'], $atributos['meta-value']);
 			if($return['type'] === CATEGORY)
 			{
 				$categories_id = $return['result'];
@@ -209,14 +207,14 @@ function show_items($atts)
 		}
 
 		$items = json_decode(file_get_contents($url))->items;
-		echo render_page(ITEMS_VIEW, $items);
+		echo tainacansc_render_page(ITEMS_VIEW, $items);
 	}
 }
 
-add_shortcode("tainacan-show-items", "show_items");
+add_shortcode("tainacan-show-items", "tainacansc_show_items" );
 
 /********************************************* [tainacan-show-collection] ********************************************/
-function show_collection($atts)
+function tainacansc_show_collection($atts)
 {
 	$atributos = shortcode_atts( array(
 		'tainacan-url' => '',
@@ -228,14 +226,72 @@ function show_collection($atts)
 		return;
 	}
 
-	$collection_info = get_collection_info($atributos['tainacan-url'], $atributos['collection-name']);
+	$collection_info = tainacansc_get_collection_info($atributos['tainacan-url'], $atributos['collection-name']);
 
 	if($collection_info)
 	{
-		//$collection_id = $collection_info->ID;
-		//$url = $atributos['tainacan-url'].'/wp-json/tainacan/v1/collections/'.$collection_id."/";
-		echo render_page(COLLECTION_VIEW , $collection_info);
+		echo tainacansc_render_page(COLLECTION_VIEW , $collection_info);
 	}
 }
 
-add_shortcode("tainacan-show-collection", "show_collection");
+add_shortcode("tainacan-show-collection", "tainacansc_show_collection" );
+
+/*Refactor*/
+function tainacan_shortcode_render_configuration_template()
+{
+	settings_fields('tainacan_shortcode_templates_options');
+	$options = get_option('tainacan_shortcode_templates');
+	print_r($options);
+
+	?>
+	<div class="wrap">
+		<form action="options.php" method="post">
+			<div class="form-group">
+				<h2>Items template</h2>
+				<div>
+					<h4>Informações dísponiveis</h4>
+					<ul class="list-inline">
+						<li>Título: <strong>{title}</strong></li>
+						<li>Data do post: <strong>{date}</strong></li>
+						<li>Conteúdo/Descrição: <strong>{content}</strong></li>
+						<li>Data da ultima modificação: <strong>{last_modified}</strong></li>
+						<li>Link: <strong>{link}</strong></li>
+						<li>Quantidade de comentários: <strong>{comment_count}</strong></li>
+						<li>Link da miniatura: <strong>{thumbnail}</strong></li>
+						<li>Link da capa: <strong>{cover}</strong></li>
+					</ul>
+				</div>
+				<textarea id="items-show-template" name="tainacan_shortcode_templates[items-show-template]" rows="15"></textarea>
+			</div>
+
+			<div class="form-group">
+				<h2>Collection template</h2>
+				<textarea id="collection-show-template" name="tainacan_shortcode_templates[collection-show-template]" class="form-control" rows="15"></textarea>
+			</div>
+			<?php
+			//submit_button("Salvar");
+			?>
+			<button type="submit" class="btn btn-primary btn-lg pull-right">Salvar</button>
+		</form>
+
+	</div>
+	<?php
+}
+
+function tainacan_shortcode_get_template_configuration()
+{
+	register_setting("tainacan_shortcode_templates_options", "tainacan_shortcode_templates", "tainacan_short_code_validate_template");
+}
+
+function tainacan_short_code_validate_template()
+{
+	return true;
+}
+
+function tainacan_shortcode_menu()
+{
+	add_options_page( 'Tainacan shortcode', 'Tainacan Shortcode', 'manage_options', 'tainacan-shortcode', 'tainacan_shortcode_render_configuration_template' );
+}
+
+add_action("admin_menu", "tainacan_shortcode_menu");
+add_action("admin_init", "tainacan_shortcode_get_template_configuration");
