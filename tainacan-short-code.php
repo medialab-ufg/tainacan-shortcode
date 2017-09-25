@@ -37,24 +37,7 @@ wp_enqueue_script("htmlmixed_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/mode
 
 wp_enqueue_script("main", $plug_in_dir . 'libs/js/main.js', null, "1.0", true);
 
-/****************************************************************-----*****************************************************************************************/
-add_action( 'admin_menu', 'tainacan_shortcode_submenu' );
-function tainacan_shortcode_submenu() {
-	//add_options_page( 'Tainacan shortcode', 'Tainacan Shortcode', 'manage_options', 'tainacan-shortcode', 'tainacansc_get_shortcode_page' );
-}
-
 /***************************************************** FUNCTIONS *****************************************************/
-function tainacansc_get_shortcode_page() {
-	if ( !current_user_can( 'manage_options' ) )  {
-		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
-	}
-	ob_start();
-	require "views/admin/shortcode-configuration-template.php";
-	$page = ob_get_clean();
-
-	echo $page;
-}
-
 function tainacansc_render_page($view, $content = null)
 {
 	ob_start();
@@ -239,13 +222,14 @@ add_shortcode("tainacan-show-collection", "tainacansc_show_collection" );
 /*Refactor*/
 function tainacan_shortcode_render_configuration_template()
 {
-	settings_fields('tainacan_shortcode_templates_options');
-	$options = get_option('tainacan_shortcode_templates');
-	print_r($options);
-
 	?>
 	<div class="wrap">
 		<form action="options.php" method="post">
+			<?php
+				settings_fields('tainacan_shortcode_templates_options');
+				$options = get_option('tainacan_shortcode_templates');
+			?>
+
 			<div class="form-group">
 				<h2>Items template</h2>
 				<div>
@@ -261,16 +245,13 @@ function tainacan_shortcode_render_configuration_template()
 						<li>Link da capa: <strong>{cover}</strong></li>
 					</ul>
 				</div>
-				<textarea id="items-show-template" name="tainacan_shortcode_templates[items-show-template]" rows="15"></textarea>
+				<textarea id="items-show-template" name="tainacan_shortcode_templates[items-show-template]" rows="15"><?php echo $options['items-show-template']; ?></textarea>
 			</div>
 
 			<div class="form-group">
 				<h2>Collection template</h2>
-				<textarea id="collection-show-template" name="tainacan_shortcode_templates[collection-show-template]" class="form-control" rows="15"></textarea>
+				<textarea id="collection-show-template" name="tainacan_shortcode_templates[collection-show-template]" class="form-control" rows="15"><?php echo $options['collection-show-template']; ?></textarea>
 			</div>
-			<?php
-			//submit_button("Salvar");
-			?>
 			<button type="submit" class="btn btn-primary btn-lg pull-right">Salvar</button>
 		</form>
 
@@ -280,7 +261,7 @@ function tainacan_shortcode_render_configuration_template()
 
 function tainacan_shortcode_get_template_configuration()
 {
-	register_setting("tainacan_shortcode_templates_options", "tainacan_shortcode_templates", "tainacan_short_code_validate_template");
+	register_setting("tainacan_shortcode_templates_options", "tainacan_shortcode_templates");
 }
 
 function tainacan_short_code_validate_template()

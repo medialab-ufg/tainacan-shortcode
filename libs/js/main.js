@@ -16,39 +16,3 @@ items_editor.on('change', function (cm_items_editor) {
 collection_editor.on('change', function (cm_collection_editor) {
     $("#collection-show-template").text(cm_collection_editor.getValue());
 });
-
-$.ajax({
-    url: CONTROLLERS_PATH + "templates_controller.php?operation=get_templates",
-    method: 'POST'
-}).done(function (result) {
-    result = jQuery.parseJSON(result);
-    if(result.items_template)
-    {
-        result.items_template = result.items_template.replace(/\\"/g, '"');
-        items_editor.setValue(result.items_template);
-    }
-
-    if(result.collection_template)
-    {
-        result.collection_template = result.collection_template.replace(/\\"/g, '"');
-        collection_editor.setValue(result.collection_template);
-    }
-});
-
-/*
-function save_templates() {
-    var items_editor_val = items_editor.getValue(),
-        collection_editor_val = collection_editor.getValue();
-    $.ajax({
-        url: CONTROLLERS_PATH + "templates_controller.php?operation=save_templates",
-        data: {items_editor_val: items_editor_val, collection_editor_val: collection_editor_val},
-        dataType: "html",
-        method: "POST"
-    }).done(function (response) {
-        response = jQuery.parseJSON(response);
-        if(response === true)
-        {
-            swal("Salvo", "Seu(s) templates foram salvos", "success");
-        }
-    });
-}*/
