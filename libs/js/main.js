@@ -14,31 +14,32 @@ $.ajax({
     method: 'POST'
 }).done(function (result) {
     result = jQuery.parseJSON(result);
-
     if(result.items_template)
     {
+        result.items_template = result.items_template.replace(/\\"/g, '"');
         items_editor.setValue(result.items_template);
     }
 
     if(result.collection_template)
     {
+        result.collection_template = result.collection_template.replace(/\\"/g, '"');
         collection_editor.setValue(result.collection_template);
     }
 });
 
 function save_templates() {
-    var items_editor_val = items_editor.getValue(), 
+    var items_editor_val = items_editor.getValue(),
         collection_editor_val = collection_editor.getValue();
-    
     $.ajax({
         url: CONTROLLERS_PATH + "templates_controller.php?operation=save_templates",
         data: {items_editor_val: items_editor_val, collection_editor_val: collection_editor_val},
+        dataType: "html",
         method: "POST"
     }).done(function (response) {
         response = jQuery.parseJSON(response);
         if(response === true)
         {
-            alert("Sucesso");
+            swal("Salvo", "Seu(s) templates foram salvos", "success");
         }
     });
 }

@@ -20,10 +20,13 @@ $plug_in_dir = plugin_dir_url(__FILE__);
 //CSS
 wp_enqueue_style("codemirror_css", $plug_in_dir . "libs/js/codemirror-5.30.0/lib/codemirror.css", null, false, "all");
 wp_enqueue_style("show_hint_css", $plug_in_dir . "libs/js/codemirror-5.30.0/addon/hint/show-hint.css", null, false, "all");
+wp_enqueue_style("Bootstrap_css", 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css', null, false, "all");
 wp_enqueue_style("main", $plug_in_dir . "libs/css/main.css", null, false, "all");
 
 //Javascript
 wp_enqueue_script("jQuery", "https://code.jquery.com/jquery-3.2.1.min.js", null, "3.2.1", true);
+wp_enqueue_script("Bootstrap_js", "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js", 'jQuery', "3.3.7", true);
+wp_enqueue_script("sweetalert_js", "https://unpkg.com/sweetalert/dist/sweetalert.min.js", 'jQuery', "3.3.7", true);
 wp_enqueue_script("codemirror_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/lib/codemirror.js', null, "5.30.0", true);
 wp_enqueue_script("show_hint_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/addon/hint/show-hint.js', null, "", true);
 wp_enqueue_script("xml_hint_js", $plug_in_dir . 'libs/js/codemirror-5.30.0/addon/hint/xml-hint.js', null, "", true);
@@ -65,11 +68,13 @@ function render_page($view, $content = null)
 
 function render_template($content, $template, $type)
 {
+	$template = stripslashes_deep($template);
 	$page = '';
 	if(strcmp($type, "items") === 0)
 	{
 		foreach($content as $item_metas)
 		{
+			$item_metas = $item_metas->item;
 			$page .= replace_in_template($template, $item_metas);
 		}
 	}
@@ -78,19 +83,27 @@ function render_template($content, $template, $type)
 		$page .= replace_in_template($template, $content);
 	}
 
-	return $page;
+	echo $page;
 }
 
 function replace_in_template($template, $content)
 {
-	str_replace("{title}", $content->post_title, $template);
-	str_replace("{date}", $content->post_date, $template);
-	str_replace("{content}", $content->post_content, $template);
-	str_replace("{last_modified}", $content->post_modified, $template);
-	str_replace("{link}", $content->guid, $template);
-	str_replace("{comment_count}", $content->comment_count, $template);
-	str_replace("{thumbnail}", $content->thumbnail, $template);
-	str_replace("{cover}", $content->cover, $template);
+	$template = str_replace("{title}", $content->post_title, $template);
+	$template = str_replace("{date}", $content->post_date, $template);
+	$template = str_replace("{content}", $content->post_content, $template);
+	$template = str_replace("{last_modified}", $content->post_modified, $template);
+	$template = str_replace("{link}", $content->guid, $template);
+	$template = str_replace("{comment_count}", $content->comment_count, $template);
+
+	if($content->thumbnail)
+	{
+		$template = str_replace("{thumbnail}", $content->thumbnail, $template);
+	}
+	else {
+		$template = str_replace("{thumbnail}", plugin_dir_url(__FILE__)."views/images/no_thumb.png", $template);
+	}
+
+	$template = str_replace("{cover}", $content->cover, $template);
 
 	return $template;
 }
