@@ -1,8 +1,8 @@
 <?php
-$collection_template = get_option("tainacan_collection_template");
+$collection_template = get_option('tainacan_shortcode_templates')['collection-show-template'];
 if(!empty($collection_template))
 {
-    tainacansc_render_template($content, $collection_template, "collection");
+    $this->render_template($content, $collection_template, "collection");
 }else{
     ?>
     <a href="<?= $content->guid; ?>" target="_blank">

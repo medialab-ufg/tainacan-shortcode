@@ -1,7 +1,7 @@
 <?php
-$items_template = get_option('tainacan_items_template');
+$items_template = get_option('tainacan_shortcode_templates')['items-show-template'];
 if(!empty($items_template)){
-    tainacansc_render_template($content, $items_template, 'items');
+    $this->render_template($content, $items_template, 'items');
 }else{
     ?>
     <div class="tainacan-items">

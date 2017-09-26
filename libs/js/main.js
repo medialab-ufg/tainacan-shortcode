@@ -1,4 +1,3 @@
-var CONTROLLERS_PATH = "../wp-content/plugins/tainacan-short-code/controllers/";
 var config = {
     lineNumbers: true,
     mode: "text/html",
