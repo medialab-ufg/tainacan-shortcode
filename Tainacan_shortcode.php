@@ -4,6 +4,8 @@ class Tainacan_shortcode {
 	private $ITEMS_VIEW = 'views/items_view.php';
 	private $COLLECTION_VIEW = 'views/collection_view.php';
 	private $CATEGORY = 1;
+	private $CACHE_COL_ID = 'tainacan_shortcode_cache_collections_id';
+	private $CACHE_COLLECTION = 'tainacan_shortcode_cache_full_collections';
 
 	function __construct()
 	{
@@ -58,11 +60,21 @@ class Tainacan_shortcode {
 	{
 		$atributos = shortcode_atts( array(
 			'tainacan-url' => '',
+			"tainacan-query-url" => '',
+			"enable-cache" => 'false',
 			"collection-name" => ''
 		), $atts );
 
 		if(empty($atributos['tainacan-url']) || empty($atributos['collection-name']))
 		{
+			if(!empty($atributos['tainacan-query-url']))
+			{
+				$url = str_replace("{", "[", $atributos['tainacan-query-url']);
+				$url = str_replace("}", "]", $url);
+
+				$items = json_decode(file_get_contents($url))->items;
+				echo $this->render_page($this->ITEMS_VIEW, $items);
+			}
 			return;
 		}
 
@@ -79,46 +91,55 @@ class Tainacan_shortcode {
 	{
 		$atributos = shortcode_atts( array(
 			'tainacan-url' => '',
+			"tainacan-query-url" => '',
 			"collection-name" => '',
 			"meta-name" => '',
 			"meta-value" => '',
+			"enable-cache" => 'false',
 			"meta-operation" => 'LIKE'
 		), $atts );
 
 		if(empty($atributos['tainacan-url']) || empty($atributos['collection-name']))
 		{
+			if(!empty($atributos['tainacan-query-url']))
+			{
+				$url = str_replace("{", "[", $atributos['tainacan-query-url']);
+				$url = str_replace("}", "]", $url);
+
+				$items = json_decode(file_get_contents($url))->items;
+				echo $this->render_page($this->ITEMS_VIEW, $items);
+			}
 			return;
 		}
 
-		$collection_info = $this->get_collection_info($atributos['tainacan-url'], $atributos['collection-name']);
 
-		if($collection_info)
+		$collection_id = $this->get_collection_id($atributos['tainacan-url'], $atributos['collection-name']);
+		if(!$collection_id) return;
+
+		$partial_url = 'wp-json/tainacan/v1/collections/';
+		if(!empty($atributos['meta-name']) && !empty($atributos['meta-value']))
 		{
-			$collection_id = $collection_info->ID;
-			if(!empty($atributos['meta-name']) && !empty($atributos['meta-value']))
+			$return = $this->get_meta_id($atributos['tainacan-url'], $collection_id, $atributos['meta-name'], $atributos['meta-value']);
+			if($return['type'] === $this->CATEGORY)
 			{
-				$return = $this->get_meta_id($atributos['tainacan-url'], $collection_id, $atributos['meta-name'], $atributos['meta-value']);
-				if($return['type'] === $this->CATEGORY)
+				$categories_id = $return['result'];
+				if(!empty($categories_id))
 				{
-					$categories_id = $return['result'];
-					if(!empty($categories_id))
-					{
-						$url = $atributos['tainacan-url'].'/wp-json/tainacan/v1/collections/'.$collection_id."/items?filter[metadata][".$categories_id['meta_id']."][op]=".$atributos['meta-operation']."&filter[metadata][".$categories_id['meta_id']."][values][]=".$categories_id['category_id'];
-					}
-				}else
-				{
-					$ids = $return['result'];
-					$atributos['meta-value'] = rawurlencode($atributos['meta-value']);
-					$url = $atributos['tainacan-url'].'/wp-json/tainacan/v1/collections/'.$collection_id."/items?filter[metadata][".$ids['meta_id']."][op]=".$atributos['meta-operation']."&filter[metadata][".$ids['meta_id']."][values][]=".$atributos['meta-value'];
+					$url = $atributos['tainacan-url'].$partial_url.$collection_id."/items?filter[metadata][".$categories_id['meta_id']."][op]=".$atributos['meta-operation']."&filter[metadata][".$categories_id['meta_id']."][values][]=".$categories_id['category_id'];
 				}
 			}else
 			{
-				$url = $atributos['tainacan-url'].'/wp-json/tainacan/v1/collections/'.$collection_id."/items/";
+				$ids = $return['result'];
+				$atributos['meta-value'] = rawurlencode($atributos['meta-value']);
+				$url = $atributos['tainacan-url'].$partial_url.$collection_id."/items?filter[metadata][".$ids['meta_id']."][op]=".$atributos['meta-operation']."&filter[metadata][".$ids['meta_id']."][values][]=".$atributos['meta-value'];
 			}
-
-			$items = json_decode(file_get_contents($url))->items;
-			echo $this->render_page($this->ITEMS_VIEW, $items);
+		}else
+		{
+			$url = $atributos['tainacan-url'].$partial_url.$collection_id."/items/";
 		}
+
+		$items = json_decode(file_get_contents($url))->items;
+		echo $this->render_page($this->ITEMS_VIEW, $items);
 	}
 
 	public function get_meta_id($url, $collection_id, $required_meta_name, $required_meta_value)
@@ -220,6 +241,27 @@ class Tainacan_shortcode {
 		return $template;
 	}
 
+	public function get_collection_id($tainacan_url, $collection_name)
+	{
+		$cache = get_option($this->CACHE_COL_ID);
+		$collection_id = false;
+		if(!empty($cache))
+		{
+			$collection_id = $cache[$collection_name];
+		}
+
+		if(!$collection_id)
+		{
+			$collection_info = $this->get_collection_info($tainacan_url, $collection_name);
+			if($collection_info)
+			{
+				$collection_id = $collection_info->ID;
+			}else return false;
+		}
+
+		return $collection_id;
+	}
+
 	public function get_collection_info($tainacan_url, $collection_name)
 	{
 		$collection_name = rawurlencode($collection_name);
@@ -229,6 +271,10 @@ class Tainacan_shortcode {
 
 		if($collection_info)
 		{
+			$tainacan_shortcode_cache = get_option($this->CACHE_COL_ID);
+			$tainacan_shortcode_cache[$collection_name] = $collection_info[0]->ID;
+			update_option($this->CACHE_COL_ID, $tainacan_shortcode_cache);
+
 			return $collection_info[0];
 		}else return false;
 	}
