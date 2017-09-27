@@ -1,14 +1,26 @@
 <?php
 class Tainacan_shortcode {
 	private $plug_in_dir;
+	/*Views*/
 	private $ITEMS_VIEW = 'views/items_view.php';
 	private $COLLECTION_VIEW = 'views/collection_view.php';
+
+	/*Types*/
 	private $CATEGORY = 1;
-	private $CACHE_COL_ID_INDEX = 'tainacan_shortcode_cache_collections_id';
-	private $CACHE_COLLECTION_INDEX = 'tainacan_shortcode_cache_full_collections';
-	private $CACHE_TIME_INDEX = 'TAINACAN_SHORT_CODE_CACHE_TIME_LOCATION';
-	private $CREATED_CACHE_COLLECTION_TIME = "CREATED_CACHE_COLLECTION_TIME";
-	private $DEFAULT_CACHE_TIME = 24; //Horas
+
+	/*Cache of collections id*/
+	private $COL_ID_CACHE_INDEX = 'TAINACAN_SHORTCODE_CACHE_COLLECTION_ID_LOCATION';//Cache dos id das coleções, realizado SEMPRE
+
+	/*Cache of all collection*/
+	private $COLLECTION_CACHE_INDEX = 'TAINACAN_SHORTCODE_CACHE_FULL_COLLECTION_LOCATION';//Indice da option onde está o cache de coleções
+	private $ITEMS_CACHE_INDEX = 'TAINACAN_SHORTCODE_CACHE_ITEMS_SET_LOCATION';//Indice da option onde está o cache de itens
+	private $CREATION_TIME_COLLECTION_CACHE_INDEX = "TAINACAN_SHORTCODE_COLLECTIONS_CREATION_TIME_CACHE_LOCATION";//Indice da option dos tempos de criação do cache das coleções
+	private $CREATION_TIME_ITEMS_CACHE_INDEX = "TAINACAN_SHORTCODE_ITEMS_CREATION_TIME_CACHE_LOCATION";//Indice da option dos tempos de criação do cache dos itens
+
+	/*Caches time*/
+	private $COLLECTION_CACHE_TIME_INDEX = 'TAINACAN_SHORTCODE_COLLECTION_CACHE_TIME_LOCATION';//Localização do tempo que o cache de coleção deve durar
+	private $ITEMS_CACHE_TIME_INDEX = 'TAINACAN_SHORTCODE_ITEMS_CACHE_TIME_LOCATION';//Localização do tempo que o cache de itens deve durar;
+	private $DEFAULT_CACHE_TIME = 24; //Tempo padrão de duração de cache em HORAS
 
 	function __construct()
 	{
@@ -82,24 +94,25 @@ class Tainacan_shortcode {
 			return;
 		}
 
+		//Cache
 		if(strcmp(strtolower($atributos['enable-cache']), "true") === 0 )
 		{
-			$cache_time = get_option($this->CACHE_TIME_INDEX);
+			$cache_time = get_option($this->COLLECTION_CACHE_TIME_INDEX);
 			if($cache_time != $atributos['cache-time'])
 			{
-				update_option($this->CACHE_TIME_INDEX, $atributos['cache-time']);
-				$cache_time = get_option($this->CACHE_TIME_INDEX);
+				update_option($this->COLLECTION_CACHE_TIME_INDEX, $atributos['cache-time']);
+				$cache_time = $atributos['cache-time'];
 			}
 
 
-			$cache = get_option($this->CACHE_COLLECTION_INDEX);
+			$cache = get_option($this->COLLECTION_CACHE_INDEX);
 			if(!empty($cache))
 			{
-				$collection_info = $cache[$atributos['collection-name']];
+				$collection_info = $cache[$atributos['tainacan-url']][$atributos['collection-name']];
 
 				if($collection_info)
 				{
-					$created_cache_collection_time = get_option($this->CREATED_CACHE_COLLECTION_TIME);
+					$created_cache_collection_time = get_option($this->CREATION_TIME_COLLECTION_CACHE_INDEX);
 					$creation_time = $created_cache_collection_time[$collection_info->ID];
 					$diff_time = $this->diff_dates_hours($creation_time, new DateTime());
 
@@ -113,14 +126,14 @@ class Tainacan_shortcode {
 			if(!$collection_info)
 			{
 				$collection_info = $this->get_collection_info($atributos['tainacan-url'], $atributos['collection-name']);
-				$cache[$atributos['collection-name']] = $collection_info;
+				$cache[$atributos['tainacan-url']] = [$atributos['collection-name'] => $collection_info];
 
-				update_option($this->CACHE_COLLECTION_INDEX, $cache);
+				update_option($this->COLLECTION_CACHE_INDEX, $cache);
 
 				$date = new DateTime();
-				$created_cache_collection_time = get_option($this->CREATED_CACHE_COLLECTION_TIME);
+				$created_cache_collection_time = get_option($this->CREATION_TIME_COLLECTION_CACHE_INDEX);
 				$created_cache_collection_time[$collection_info->ID] = $date;
-				update_option($this->CREATED_CACHE_COLLECTION_TIME, $created_cache_collection_time);
+				update_option($this->CREATION_TIME_COLLECTION_CACHE_INDEX, $created_cache_collection_time);
 			}
 		}else
 		{
@@ -143,6 +156,7 @@ class Tainacan_shortcode {
 			"meta-name" => '',
 			"meta-value" => '',
 			"enable-cache" => 'false',
+			"cache-time" => $this->DEFAULT_CACHE_TIME,
 			"meta-operation" => 'LIKE'
 		), $atts );
 
@@ -185,7 +199,51 @@ class Tainacan_shortcode {
 			$url = $atributos['tainacan-url'].$partial_url.$collection_id."/items/";
 		}
 
-		$items = json_decode(file_get_contents($url))->items;
+		//Cache
+		if(strcmp(strtolower($atributos['enable-cache']), "true") === 0 )
+		{
+			$cache_time = get_option($this->ITEMS_CACHE_TIME_INDEX);
+			if($cache_time != $atributos['cache-time'])
+			{
+				update_option($this->ITEMS_CACHE_TIME_INDEX, $atributos['cache-time']);
+				$cache_time = $atributos['cache-time'];
+			}
+
+			$cache = get_option($this->ITEMS_CACHE_INDEX);
+			if(!empty($cache))
+			{
+				$items = $cache[$atributos['tainacan-url']][$atributos['collection-name']][$atributos['meta-name']][$atributos['meta-value']][$atributos['meta-operation']];
+
+				if($items)
+				{
+					$created_cache_items_time = get_option($this->CREATION_TIME_ITEMS_CACHE_INDEX);
+					$creation_time = $created_cache_items_time[$atributos['tainacan-url']][$atributos['collection-name']][$atributos['meta-name']][$atributos['meta-value']][$atributos['meta-operation']];
+					$diff_time = $this->diff_dates_hours($creation_time, new DateTime());
+
+					if($diff_time > $cache_time)
+					{
+						$items = false;
+					}
+				}
+			}
+
+			if(!$items)
+			{
+				$items = json_decode(file_get_contents($url))->items;
+				$cache[$atributos['tainacan-url']][$atributos['collection-name']][$atributos['meta-name']][$atributos['meta-value']][$atributos['meta-operation']] = $items;
+
+				update_option($this->ITEMS_CACHE_INDEX, $cache);
+
+				$date = new DateTime();
+				$created_cache_items_time = get_option($this->CREATION_TIME_ITEMS_CACHE_INDEX);
+				$created_cache_items_time[$atributos['tainacan-url']][$atributos['collection-name']][$atributos['meta-name']][$atributos['meta-value']][$atributos['meta-operation']] = $date;
+				update_option($this->CREATION_TIME_ITEMS_CACHE_INDEX, $created_cache_items_time);
+			}
+		}else
+		{
+			$items = json_decode(file_get_contents($url))->items;
+		}
+
 		echo $this->render_page($this->ITEMS_VIEW, $items);
 	}
 
@@ -290,11 +348,11 @@ class Tainacan_shortcode {
 
 	public function get_collection_id($tainacan_url, $collection_name)
 	{
-		$cache = get_option($this->CACHE_COL_ID_INDEX);
+		$cache = get_option($this->COL_ID_CACHE_INDEX);
 		$collection_id = false;
 		if(!empty($cache))
 		{
-			$collection_id = $cache[$collection_name];
+			$collection_id = $cache[$tainacan_url][$collection_name];
 		}
 
 		if(!$collection_id)
@@ -318,9 +376,9 @@ class Tainacan_shortcode {
 
 		if($collection_info)
 		{
-			$tainacan_shortcode_cache = get_option($this->CACHE_COL_ID_INDEX);
-			$tainacan_shortcode_cache[$collection_name] = $collection_info[0]->ID;
-			update_option($this->CACHE_COL_ID_INDEX, $tainacan_shortcode_cache);
+			$tainacan_shortcode_cache = get_option($this->COL_ID_CACHE_INDEX);
+			$tainacan_shortcode_cache[$tainacan_url] = [$collection_name => $collection_info[0]->ID];
+			update_option($this->COL_ID_CACHE_INDEX, $tainacan_shortcode_cache);
 
 			return $collection_info[0];
 		}else return false;
