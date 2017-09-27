@@ -95,7 +95,7 @@ class Tainacan_shortcode {
 		}
 
 		//Cache
-		if(strcmp(strtolower($atributos['enable-cache']), "true") === 0 )
+		if(strcmp(strtolower($atributos['enable-cache']), "true") === 0 || $atributos['cache-time'] != $this->DEFAULT_CACHE_TIME)
 		{
 			$cache_time = get_option($this->COLLECTION_CACHE_TIME_INDEX);
 			if($cache_time != $atributos['cache-time'])
@@ -200,7 +200,7 @@ class Tainacan_shortcode {
 		}
 
 		//Cache
-		if(strcmp(strtolower($atributos['enable-cache']), "true") === 0 )
+		if(strcmp(strtolower($atributos['enable-cache']), "true") === 0 || $atributos['cache-time'] != $this->DEFAULT_CACHE_TIME)
 		{
 			$cache_time = get_option($this->ITEMS_CACHE_TIME_INDEX);
 			if($cache_time != $atributos['cache-time'])
