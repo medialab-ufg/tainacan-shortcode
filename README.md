@@ -29,6 +29,15 @@ Além de exibir todos os itens de uma coleção também é possível exibir um d
 ```
 Os parâmetros **meta-name** e **meta-value** correspondem ao nome do metadado e ao valor desejado para aquele metadado respectivamente.
 
+### Utilizando query da API
+
+Uma outra forma de capturar as informações é utilizando a query de acesso direto a API do Tainacan. Isso pode ser feito da seguinte forma:
+
+```sh
+[tainacan-show-items tainacan-query-url="{Query da API do Tainacan}"]
+```
+Observação: caso seja utilizado o shortcode de itens e seja colocada um query de coleção então sua coleção não será exibida corretamente e vice-versa.
+
 ### Cache
 Por padrão o é realizado o cache do id das coleções para melhorar o desempenho das consultas mas além deste cache pode ser realizado também o cache dos metadados de uma coleção e o dos metadados de itens.
 #### Cache de coleção
@@ -49,7 +58,7 @@ O cache de itens funciona extamente igual ao cache de coleção. Exemplo:
 ```sh
 [tainacan-show-items tainacan-url="{URL da home de sua instalação Tainacan}" collection-name="{Nome da coleção dos itens}" meta-name="{Nome do metadado}" meta-value="{Valor desejado para o metadado}" enable-cache="true" cache-time="12"]
 ```
-## Exibição dos itens
+## Template de exibição
 Tanto a coleção quanto os itens são exibidos utilizando um template padrão, caso deseje alterar esse template é necessário criar um novo template e o cadastrar. Para cadastrar um novo template de exibição é necessário acessar o painel de administração do Wordpress, acessar o menu de configurações e clicar no menu "Tainacan shortcode". Nessa tela são mostradas duas caixa de edição, a primeira para o template de itens e a segunda para o template de coleção.
 
 No template de itens deve ser colocado o código HTML para a exibição de apenas um item, esse código será replicado para todos os itens da resposta.
@@ -66,19 +75,6 @@ Há oito metadados disponíveis para uso no template, cada metadado possui seu s
 | {Quantidade de comentários} | {comment_count} |
 | Link da miniatura | {thumbnail} |
 | Link da capa (disponível apenas em coleção) | {cover} |
-
-Exempo template itens:
-```sh
-<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-  <a href="{link}" target="_blank" class="thumbnail">
-    <img src="{thumbnail}">
-    <div class="caption text-center">
-      <h3>{title}</h3>
-      <h4>{last_modified}</h4>
-    </div>
-  </a>
-</div>
-```
 
 Exemplo template coleção:
 ```sh
@@ -102,3 +98,17 @@ Exemplo template coleção:
   </div>
 </a>
 ```
+
+Exempo template itens:
+```sh
+<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+  <a href="{link}" target="_blank" class="thumbnail">
+    <img src="{thumbnail}">
+    <div class="caption text-center">
+      <h3>{title}</h3>
+      <h4>{last_modified}</h4>
+    </div>
+  </a>
+</div>
+```
+
